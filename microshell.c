@@ -21,18 +21,18 @@ static int error_message(char *msg){
 	return 1;
 }
 
-static void	execute_cd(char **args){
+static int	execute_cd(char **args){
 	int i = -1;
 	while (args[++i] != NULL)
 		continue;
 	if (i != 2) // arreglar eso
-		exit (error_message("error: bad arguments"));
+		return (error_message("error: bad arguments"));
 	if (chdir(args[1]) == -1){
 		write(2, "error: cannot change directory to " , sizeof("error: cannot change directory to "));
 		write(2, args[1], ft_strlen(args[1]));
 		write(2, "\n", 1);
 	}
-	exit (0);
+	return 0;
 }
 
 int main(int argc, char **argv, char **env){
@@ -52,7 +52,7 @@ int main(int argc, char **argv, char **env){
 		if (!strcmp(argv[i],"|")){
 			++count;
 			int pid = fork();
-			if (pid == 0){
+			if (pid == 0 && strcmp(argv[cmd], "cd")){
 				if (count != 1 || last == 1)
 					dup2(fd[0][0], STDIN_FILENO);
 				dup2(fd[1][1], STDOUT_FILENO);
@@ -61,8 +61,6 @@ int main(int argc, char **argv, char **env){
 				close(fd[1][0]);
 				close(fd[1][1]);
 				argv[i] = NULL;
-				if (!strcmp(argv[cmd], "cd"))
-					execute_cd(&argv[cmd]);
 				if (execve(argv[cmd], &argv[cmd], env) == -1){
 					write(2, "error: cannot execute ", sizeof("error: cannot execute "));
 					write(2, argv[cmd] ,ft_strlen(argv[cmd]));
@@ -72,6 +70,12 @@ int main(int argc, char **argv, char **env){
 			}
 			else
 				waitpid(pid,NULL, 0);
+			if (!strcmp(argv[cmd], "cd")){
+				if (pid == 0)
+					exit (0);
+				argv[i] = NULL;
+				execute_cd(&argv[cmd]);
+			}
 			last = 1;
 			cmd = i + 1;
 			close(fd[0][0]);
@@ -83,7 +87,7 @@ int main(int argc, char **argv, char **env){
 		else if (!strcmp(argv[i],";")){
 			++count;
 			int pid = fork();
-			if (pid == 0){
+			if (pid == 0 && strcmp(argv[cmd], "cd")){
 				if (count != 1 || last == 1)
 					dup2(fd[0][0], STDIN_FILENO);
 				close(fd[0][0]);
@@ -91,8 +95,6 @@ int main(int argc, char **argv, char **env){
 				close(fd[1][0]);
 				close(fd[1][1]);
 				argv[i] = NULL;
-				if (!strcmp(argv[cmd], "cd"))
-					execute_cd(&argv[cmd]);
 				if (execve(argv[cmd], &argv[cmd], env) == -1){
 					write(2, "error: cannot execute ", sizeof("error: cannot execute "));
 					write(2, argv[cmd] ,ft_strlen(argv[cmd]));
@@ -102,6 +104,12 @@ int main(int argc, char **argv, char **env){
 			}
 			else
 				waitpid(pid,NULL, 0);
+			if (!strcmp(argv[cmd], "cd")){
+				if (pid == 0)
+					exit (0);
+				argv[i] = NULL;
+				execute_cd(&argv[cmd]);
+			}
 			last = 0;
 			cmd = i + 1;
 			close(fd[0][0]);
@@ -110,12 +118,10 @@ int main(int argc, char **argv, char **env){
 			fd[0][1] = fd[1][1];
 			pipe(fd[1]);
 		}
-	//	printf("fd[0][0] = %d || fd[0][1] = %d\n", fd[0][0],fd[0][1]);
-	//	printf("fd[1][0] = %d || fd[1][1] = %d\n", fd[1][0],fd[1][1]);
 	}
 	++count;
 	int pid = fork();
-	if (pid == 0){
+	if (pid == 0 && strcmp(argv[cmd], "cd")){
 		if (count != 1 || last == 1)
 			dup2(fd[0][0], STDIN_FILENO);
 		close(fd[0][0]);
@@ -123,8 +129,6 @@ int main(int argc, char **argv, char **env){
 		close(fd[1][0]);
 		close(fd[1][1]);
 		argv[i] = NULL;
-		if (!strcmp(argv[cmd], "cd"))
-			execute_cd(&argv[cmd]);
 		if (execve(argv[cmd], &argv[cmd], env) == -1){
 			write(2, "error: cannot execute ", sizeof("error: cannot execute "));
 			write(2, argv[cmd] ,ft_strlen(argv[cmd]));
@@ -134,6 +138,12 @@ int main(int argc, char **argv, char **env){
 	}
 	else
 		waitpid(pid,NULL, 0);
+	if (!strcmp(argv[cmd], "cd")){
+		if (pid == 0)
+			exit (0);
+		argv[i] = NULL;
+		execute_cd(&argv[cmd]);
+	}
 	last = 1;
 	cmd = i + 1;
 	close(fd[0][0]);
