@@ -95,6 +95,8 @@ int main(int argc, char **argv, char **env){
 				close(fd[1][0]);
 				close(fd[1][1]);
 				argv[i] = NULL;
+				if (argv[cmd] == NULL)
+					exit (0);
 				if (execve(argv[cmd], &argv[cmd], env) == -1){
 					write(2, "error: cannot execute ", sizeof("error: cannot execute "));
 					write(2, argv[cmd] ,ft_strlen(argv[cmd]));
@@ -119,6 +121,8 @@ int main(int argc, char **argv, char **env){
 			pipe(fd[1]);
 		}
 	}
+	if (argv[cmd] == NULL)
+		return 0;
 	++count;
 	int pid = fork();
 	if (pid == 0 && strcmp(argv[cmd], "cd")){
