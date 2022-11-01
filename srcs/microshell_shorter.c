@@ -26,7 +26,7 @@ static int	exec_cd(char **args){
 	if (i != 2)
 		return (error_message("error: bad arguments"));
 	if (chdir(args[1]) == -1){
-		write(2, "error: cannot change directory to ", sizeof(" error: cannot change directory to "));
+		write(2, "error: cannot change directory to ", sizeof("error: cannot change directory to "));
 		write(2, args[1], ft_strlen(args[1]));
 		write(2, "\n", 1);
 	}
@@ -84,10 +84,11 @@ int main(int argc, char **argv, char **env){
 	if (pipe(fd[0]) == -1 || pipe(fd[1]) == -1)
 		return (error_message("error: fatal"));
 	while (argv[++i]){
-	if (!strcmp(argv[i], "|"))
-		ejecu_troll(argv, &i, &count, &cmd, &last, fd, env, 1);
-	else if (!strcmp(argv[i], ";"))
-		ejecu_troll(argv, &i, &count, &cmd, &last, fd, env, 0);
+		close(fd[0][1]);
+		if (!strcmp(argv[i], "|"))
+			ejecu_troll(argv, &i, &count, &cmd, &last, fd, env, 1);
+		else if (!strcmp(argv[i], ";"))
+			ejecu_troll(argv, &i, &count, &cmd, &last, fd, env, 0);
 	}
 	if (argv[cmd] == NULL)
 		return 0;
