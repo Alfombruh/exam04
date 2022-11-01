@@ -28,12 +28,12 @@ microshell
 i love my microshell
 $>
 
-```
 Hints:
 Don't forget to pass the environment variable to execve
 
 Hints:
 Do not leak file descriptors!
+
 ---
 ## IT DOES NO ALLOCATE MEMORY
 
